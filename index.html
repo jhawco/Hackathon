@@ -27,8 +27,7 @@
 
 
     <script>
-        // Sample bathroom data
-        
+
 
         var map = L.map('map').setView([42.3601, -71.0589], 13);
         var bathroomList = document.getElementById('bathroomList');
@@ -76,13 +75,28 @@
         navigator.geolocation.getCurrentPosition(success, error);
 
         // Fetch data from the Python server
-        fetch('/bathrooms')
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(bathroom => addBathroomMarker(bathroom));
-            })
-            .catch(error => console.error('Error fetching bathrooms:', error));
+        fetch(csvFilePath)
+        .then(response => response.text())
+        .then(csvData => {
+            // Parse CSV data
+            const rows = csvData.split('\n').slice(1); // Skip header row
+            const filteredData = [];
+
+            rows.forEach(row => {
+                const [latitude, longitude] = row.split(',');
+
+                // Calculate distance between user and CSV coordinates
+                const distance = calculateDistance(userLat, userLng, parseFloat(latitude), parseFloat(longitude));
+
+                // Check if the distance is within the specified range
+                if (distance <= maxDistance) {
+                    // Add to filtered data
+                    filteredData.push([latitude, longitude]);
+                }
+            });
+        })
     </script>
 </body>
 
 </html>
+        
