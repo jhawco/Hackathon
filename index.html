@@ -43,7 +43,7 @@
         }).addTo(map);
 
         // Function to add a marker and list item for each bathroom
-        function addBathroomMarker(bathroom, distance) {
+        function addBathroomMarker(bathroom, userLat, userLon) {
             var marker = L.marker([bathroom.latitude, bathroom.longitude]).addTo(map);
             marker.bindPopup(`<b>${bathroom.name}</b><br>Address: ${bathroom.address}`).openPopup();
 
@@ -55,6 +55,7 @@
             listItem.textContent = `${bathroom.name} - ${distance.toFixed(2)} km`;
             bathroomList.appendChild(listItem);
         }
+
 
         // Function to handle geolocation errors
         function error(err) {
@@ -68,7 +69,6 @@
             var userLon = position.coords.longitude;
             var userMarker = L.marker([userLat, userLon]).addTo(map);
             userMarker.bindPopup('You are here').openPopup();
-
             // Add markers and list items for each bathroom
             bathrooms.forEach(bathroom => addBathroomMarker(bathroom, userLat, userLon));
 
