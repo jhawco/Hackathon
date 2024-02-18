@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        #map {
+            height: 550px;
+            width: 550px;
+        }
+    </style>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <title>Boston Bathroom Finder</title>
+</head>
+
+<body>
+    <div id="map"></div>
+    <h1>Check out this map</h1>
+
+    <h1>Nearby Bathrooms</h1>
+    <ul id="bathroomList"></ul>
+
+
+    <script>
+        // Sample bathroom data
+        var bathrooms = [
+            { name: 'Bathroom A', address: '123 Main St', latitude: 42.3601, longitude: -71.0589 },
+            { name: 'Bathroom B', address: '456 Elm St', latitude: 42.3551, longitude: -71.0609 },
+            // Add more bathroom data as needed
+        ];
+
+        var map = L.map('map').setView([42.3601, -71.0589], 13);
+        var bathroomList = document.getElementById('bathroomList');
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        // Function to add a marker and list item for each bathroom
+        function addBathroomMarker(bathroom, distance) {
+            var marker = L.marker([bathroom.latitude, bathroom.longitude]).addTo(map);
+            marker.bindPopup(`<b>${bathroom.name}</b><br>Address: ${bathroom.address}`).openPopup();
+
+            // Calculate distance between user and bathroom
+            var distance = L.latLng(userLat, userLon).distanceTo(L.latLng(bathroom.latitude, bathroom.longitude)) / 1000;
+
+            // Add bathroom to the list
+            var listItem = document.createElement('li');
+            listItem.textContent = `${bathroom.name} - ${distance.toFixed(2)} km`;
+            bathroomList.appendChild(listItem);
+        }
+
+        // Function to handle geolocation errors
+        function error(err) {
+            console.warn(`ERROR(${err.code}): ${err.message}`);
+        }
+
+
+        // Function to handle successful geolocation
+        function success(position) {
+            var userLat = position.coords.latitude;
+            var userLon = position.coords.longitude;
+            var userMarker = L.marker([userLat, userLon]).addTo(map);
+            userMarker.bindPopup('You are here').openPopup();
+
+            // Add markers and list items for each bathroom
+            bathrooms.forEach(bathroom => addBathroomMarker(bathroom, userLat, userLon));
+
+            // Center the map on the user's location
+            map.setView([userLat, userLon], 13);
+        }
+
+        // Get user's location
+        navigator.geolocation.getCurrentPosition(success, error);
+
+        // Fetch data from the Python server
+        fetch('/bathrooms')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(bathroom => addBathroomMarker(bathroom));
+            })
+            .catch(error => console.error('Error fetching bathrooms:', error));
+    </script>
+</body>
+
+</html>
