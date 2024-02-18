@@ -1,5 +1,6 @@
 import csv
 
+csv_file_path = 'Public_Restrooms.csv'
 
 def haversine(lat1, lon1, lat2, lon2):
     from math import radians, sin, cos, sqrt, atan2
@@ -32,8 +33,8 @@ def filter_bathrooms(csv_file_path, user_lat, user_lon, max_distance_km=5.0):
         for row in csv_reader:
             # Handle missing or improperly formatted values
             try:
-                bathroom_lat = float(row.get('latitude', 0))
-                bathroom_lon = float(row.get('longitude', 0))
+                bathroom_lat = float(row.get('lat', 0))
+                bathroom_lon = float(row.get('lon', 0))
             except ValueError:
                 continue
 
@@ -52,24 +53,5 @@ def filter_bathrooms(csv_file_path, user_lat, user_lon, max_distance_km=5.0):
     return filtered_bathrooms
 
 
-
-# Example usage
-user_latitude = 42.3601
-user_longitude = -71.0589
-csv_file_path = 'Public_Restrooms.csv'
-
-filtered_bathrooms = filter_bathrooms(csv_file_path, user_latitude, user_longitude)
-if not filtered_bathrooms:
-    print("No bathrooms found within the specified distance.")
-
-for bathroom in filtered_bathrooms:
-    print(f"Name: {bathroom['name']}, Address: {bathroom['address']}, Distance: {bathroom['distance_km']:.2f} km")
-
-
-
-
-
-
-
-
-    
+for bathroom in filter_bathrooms(csv_file_path, 40.7128, -74.0060):
+    print(bathroom)
